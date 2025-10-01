@@ -1,5 +1,8 @@
 from models import POIType, POI, Visitor,  is_close
 from registry import POIRegistry
+from config import load_config_json, ConfigError
+
+
 
 def prompt_int(msg: str) -> int:
     while True:
@@ -259,6 +262,15 @@ def rename_type_menu(reg: POIRegistry):
     except Exception as e:
         print("Error:", e)
 
+#JSON Loading config menu
+def load_config_menu(reg: POIRegistry):
+    path = prompt_str("Path to JSON file: ")
+    try:
+        load_config_json(path, reg)
+        print("Config loaded.")
+    except ConfigError as e:
+        print("Config error:", e)
+
 def main():
     reg = POIRegistry()
     MENU = {
@@ -281,6 +293,7 @@ def main():
         "17": ("[Ext] Rename attribute (with migration)", rename_attr_menu),
         "18": ("[Ext] Rename POI type", rename_type_menu),
         "19": ("Delete POI type (only if unused)", delete_type_menu),
+        "20": ("Load config from JSON (optional)", load_config_menu),
         "0": ("Quit", None),
     }
     while True:
