@@ -101,6 +101,13 @@ class POIRegistry:
     def list_pois(self) -> List[POI]:
         return list(self._pois.values())
     
+    # ---------- Delete POI Bug Fix ----------
+    def delete_poi(self, poi_id: int) -> bool:
+        """Remove a POI from the active registry. ID remains reserved (no reuse).
+        Past Visit objects remain as historical records."""
+        p = self._pois.pop(poi_id, None)
+        return p is not None
+
     # --- Visitors & Visits ---
     # --- Visitors ---
     def add_visitor(self, visitor_id: int, name: str, nationality: str) -> Visitor:
@@ -327,5 +334,89 @@ class POIRegistry:
             rows.append((date, vid, name, nat))
         rows.sort(key=lambda t: (t[1], t[2]))  # id→name
         return rows
+    
+    # ---------- VQ2: number of DISTINCT visitors per POI (include zero-visit POIs) ----------
+    def counts_distinct_visitors_per_poi(self):
+        """Return [(POI, count)], sorted by count desc, then id, then name."""
+        # build poi_id -> set(visitor_ids)
+        distinct: Dict[int, set[int]] = {}
+        for vis in self._visits:
+            distinct.setdefault(vis.poi.id, set()).add(vis.visitor.id)
+        rows = []
+        for pid, p in self._pois.items():
+            cnt = len(distinct.get(pid, set()))
+            rows.append((-cnt, p.id, p.name, p, cnt))
+        rows.sort(key=lambda t: (t[0], t[1], t[2]))
+        return [(p, cnt) for (_nc, _id, _nm, p, cnt) in rows]
+
+    # ---------- VQ3: number of DISTINCT POIs per visitor (include visitors with zero) ----------
+    def counts_distinct_pois_per_visitor(self):
+        """Return [(Visitor, count)], sorted by count desc, then id, then name."""
+        # build visitor_id -> set(poi_ids)
+        distinct: Dict[int, set[int]] = {vid: set() for vid in self._visitors.keys()}
+        for vis in self._visits:
+            distinct.setdefault(vis.visitor.id, set()).add(vis.poi.id)
+        rows = []
+        for vid, v in self._visitors.items():
+            cnt = len(distinct.get(vid, set()))
+            rows.append((-cnt, v.id, v.name, v, cnt))
+        rows.sort(key=lambda t: (t[0], t[1], t[2]))
+        return [(v, cnt) for (_nc, _id, _nm, v, cnt) in rows]
+
+    # ---------- VQ7: coverage fairness ----------
+    def visitors_meeting_coverage(self, m: int, t: int):
+        """Visitors who visited ≥ m DISTINCT POIs across ≥ t DISTINCT TYPES.
+        Return [(Visitor, poi_count, type_count)], sorted by poi_count desc,
+        then type_count desc, then id, then name.
+        """
+        if m < 0 or t < 0:
+            raise ValueError("m and t must be non-negative integers")
+        poi_sets: Dict[int, set[int]] = {}
+        type_sets: Dict[int, set[str]] = {}
+        for vis in self._visits:
+            vid = vis.visitor.id
+            poi_sets.setdefault(vid, set()).add(vis.poi.id)
+            type_sets.setdefault(vid, set()).add(vis.poi.poi_type.name)
+        rows = []
+        for vid, v in self._visitors.items():
+            pois = len(poi_sets.get(vid, set()))
+            types = len(type_sets.get(vid, set()))
+            if pois >= m and types >= t:
+                rows.append((-pois, -types, v.id, v.name, v, pois, types))
+        rows.sort(key=lambda r: (r[0], r[1], r[2], r[3]))
+        return [(v, pois, types) for (_np, _nt, _id, _nm, v, pois, types) in rows]
+    
+    # ---------- Extension: rename attribute on a type ----------
+    def rename_attribute_on_type(self, type_name: str, old_attr: str, new_attr: str) -> None:
+        key = type_name.strip().lower()
+        t = self._types.get(key)
+        if not t: raise KeyError(f"Unknown POI type '{type_name}'")
+        old = old_attr.strip(); new = new_attr.strip()
+        if not old or not new or old == new: raise ValueError("Invalid attribute names")
+        if old not in t.attributes: raise KeyError(f"Attribute '{old}' not on type '{type_name}'")
+        if new in t.attributes: raise ValueError(f"Attribute '{new}' already exists on '{type_name}'")
+        # rename in schema
+        idx = t.attributes.index(old)
+        t.attributes[idx] = new
+        # migrate values on existing POIs
+        for p in self._pois.values():
+            if p.poi_type is t and old in p.values:
+                if new not in p.values:
+                    p.values[new] = p.values.pop(old)
+                else:
+                    # policy: keep existing 'new', drop 'old'
+                    del p.values[old]
+    
+    # ---------- Extension: rename a POI type ----------
+    def rename_poi_type(self, old_name: str, new_name: str) -> None:
+        oldk = old_name.strip().lower(); newk = new_name.strip().lower()
+        if not oldk or not newk or oldk == newk: raise ValueError("Invalid type names")
+        if oldk not in self._types: raise KeyError(f"Unknown POI type '{old_name}'")
+        if newk in self._types: raise ValueError(f"POI type '{new_name}' already exists")
+        t = self._types.pop(oldk)
+        t.name = newk
+        self._types[newk] = t
+
+
 
 
