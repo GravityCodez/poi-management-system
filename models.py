@@ -45,7 +45,7 @@ class POI:
         self.poi_type = poi_type
         self.values = dict(values or {})  # attribute -> value
 
-    # read-only accessors (simple encapsulation per slides)
+    # read-only accessors (simple encapsulation)
     @property
     def id(self) -> int: return self._id
     @property

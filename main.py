@@ -1,3 +1,6 @@
+#By GravityCodez
+#https://github.com/GravityCodez/poi-management-systemx
+
 from models import POIType, POI, Visitor,  is_close #redundand import
 from registry import POIRegistry
 from config import load_config_json, ConfigError

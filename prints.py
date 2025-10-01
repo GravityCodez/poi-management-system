@@ -1,4 +1,4 @@
-#old testing area:
+#old testing area:  THESE ARE PRINTS USED DEBUGGING
 # # test of our models
     # forest = POIType("forest", ["area", "protected"])
     # poi1 = POI(1, "Mangrove Forest", forest, 100, 200, {"area": 350, "protected": True})
