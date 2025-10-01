@@ -170,6 +170,31 @@ def coverage_fairness_menu(reg: POIRegistry):
         print("No visitors meet the thresholds."); return
     for v, pois, types in rows:
         print(f"{v.id}\t{v.name}\tpois={pois}\ttypes={types}")
+def counts_per_poi_menu(reg: POIRegistry):
+    rows = reg.counts_distinct_visitors_per_poi()
+    if not rows:
+        print("No POIs yet."); return
+    for p, cnt in rows:
+        print(f"{p.id}\t{p.name}\t{cnt} distinct visitors")
+
+def counts_per_visitor_menu(reg: POIRegistry):
+    rows = reg.counts_distinct_pois_per_visitor()
+    if not rows:
+        print("No visitors yet."); return
+    for v, cnt in rows:
+        print(f"{v.id}\t{v.name}\t{cnt} distinct POIs")
+
+def coverage_fairness_menu(reg: POIRegistry):
+    m = prompt_int("Minimum DISTINCT POIs (m): ")
+    t = prompt_int("Minimum DISTINCT TYPES (t): ")
+    try:
+        rows = reg.visitors_meeting_coverage(m, t)
+    except ValueError as e:
+        print("Error:", e); return
+    if not rows:
+        print("No visitors meet the thresholds."); return
+    for v, pois, types in rows:
+        print(f"{v.id}\t{v.name}\tpois={pois}\ttypes={types}")
 
 #Spatial queries from PQ4
 def within_radius_menu(reg: POIRegistry):
