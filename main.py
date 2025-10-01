@@ -298,8 +298,11 @@ def main():
     }
     while True:
         print("\n=== MENU ===")
-        for key in sorted(MENU.keys()):
-            print(f"{key}) {MENU[key][0]}")
+        # show numeric order and put Quit last
+        keys = sorted((k for k in MENU if k != "0"), key=int) + ["0"]
+        for k in keys:
+            print(f"{k}) {MENU[k][0]}")
+
         choice = input("Choose: ").strip()
         if choice == "0":
             print("And with that, our demo comes to an end, goodnight!"); break
