@@ -119,6 +119,15 @@ class POIRegistry:
         if p is None:
             raise KeyError(f"Unknown poi id {poi_id}")
         visit = Visit(v, p, date, rating)
+        # rating must be an integer 1..10 if provided, after breaking a lot of tests...
+        if rating is not None:
+            # accept ints, or floats that are whole numbers (e.g., 7.0)
+            if isinstance(rating, float) and rating.is_integer():
+                rating = int(rating)
+            if not isinstance(rating, int):
+                raise ValueError("Rating must be an integer 1..10")
+            if not (1 <= rating <= 10):
+                raise ValueError("Rating must be an integer 1..10")
         self._visits.append(visit)
         return visit
 

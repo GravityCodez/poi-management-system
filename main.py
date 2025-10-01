@@ -43,8 +43,14 @@ def record_visit_menu(reg: POIRegistry):
     vid = prompt_int("Visitor id (int): ")
     pid = prompt_int("POI id (existing): ")
     date = prompt_str("Date (dd/mm/yyyy): ")
-    rating_raw = input("Rating (optional, blank to skip): ").strip()
-    rating = float(rating_raw) if rating_raw else None
+    rating_raw = input("Rating (1..10, blank to skip): ").strip()
+    if rating_raw:
+        try:
+            rating = int(rating_raw)
+        except ValueError:
+            print("Please enter an integer 1..10 for rating or leave blank."); return
+    else:
+        rating = None
 
     try:
         reg.record_visit(vid, pid, date, rating)

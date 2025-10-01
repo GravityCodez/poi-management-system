@@ -71,11 +71,11 @@ class Visitor:
         return f"Visitor(id={self.id}, name={self.name}, nationality={self.nationality})"
 
 class Visit:
-    def __init__(self, visitor: "Visitor", poi: "POI", date: str, rating: float | None = None):
+    def __init__(self, visitor: "Visitor", poi: "POI", date: str, rating: int | None = None):
         self.visitor = visitor
         self.poi = poi
         self.date =  _validate_date_ddmmyyyy(date) #Handle date format and validation
-        self.rating = rating      # optional numeric rating
+        self.rating = rating      # optional numeric rating, logs: 1) Added error handling to be out of 10, broke my testings...
 
     def __str__(self) -> str:
         r = f", rating={self.rating}" if self.rating is not None else ""
@@ -83,3 +83,4 @@ class Visit:
 
 
 # --- POIRegistry: so-fish-ticated(sorry for poor humor) manager for types & POIs ---
+#Update: Now depracated, moved to registry.py
