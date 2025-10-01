@@ -1,8 +1,6 @@
-from models import POIType, POI, Visitor,  is_close
+from models import POIType, POI, Visitor,  is_close #redundand import
 from registry import POIRegistry
 from config import load_config_json, ConfigError
-
-
 
 def prompt_int(msg: str) -> int:
     while True:
@@ -282,15 +280,15 @@ def main():
         "6": ("List POIs of a type", list_pois_type_menu),
         "7": ("Visitor history", list_visitor_history_menu),
         "8": ("Visitors for a POI", visitors_for_poi_menu),
-        "9":  ("Within radius (PQ4)", within_radius_menu),
+        "9":  ("Within radius", within_radius_menu),
         "10": ("Exactly on boundary",  boundary_menu),
-        "11": ("Top-k POIs by distinct visitors (VQ5)", top_pois_menu),
-        "12": ("Top-k visitors by distinct POIs (VQ4)", top_visitors_menu),
-        "13": ("Counts: distinct visitors per POI (VQ2)", counts_per_poi_menu),
-        "14": ("Counts: distinct POIs per visitor (VQ3)", counts_per_visitor_menu),
-        "15": ("Coverage fairness (VQ7)", coverage_fairness_menu),
-        "16": ("Delete POI (required)", delete_poi_menu),
-        "17": ("[Ext] Rename attribute (with migration)", rename_attr_menu),
+        "11": ("Top-k POIs by distinct visitors", top_pois_menu),
+        "12": ("Top-k visitors by distinct POIs", top_visitors_menu),
+        "13": ("Counts: distinct visitors per POI", counts_per_poi_menu),
+        "14": ("Counts: distinct POIs per visitor", counts_per_visitor_menu),
+        "15": ("Coverage fairness", coverage_fairness_menu),
+        "16": ("Delete POI", delete_poi_menu),
+        "17": ("[Ext] Rename attribute", rename_attr_menu),
         "18": ("[Ext] Rename POI type", rename_type_menu),
         "19": ("Delete POI type (only if unused)", delete_type_menu),
         "20": ("Load config from JSON (optional)", load_config_menu),

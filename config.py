@@ -2,7 +2,7 @@ from __future__ import annotations
 import json
 from typing import Any, Dict, List
 from registry import POIRegistry
-from models import DATE_FMT  # just for reference in messages
+from models import DATE_FMT  
 
 class ConfigError(Exception):
     """Raised when the JSON config is invalid with a clear location path."""

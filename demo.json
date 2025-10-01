@@ -1,0 +1,47 @@
+{
+  "types": [
+    {"name": "museum",   "attributes": ["tickets", "open"]},
+    {"name": "park",     "attributes": ["benches", "area"]},
+    {"name": "gallery",  "attributes": ["curator", "open"]},
+    {"name": "cafe",     "attributes": ["seats"]},
+    {"name": "viewpoint","attributes": ["elevation"]},
+    {"name": "zoo",      "attributes": ["enclosures"]}  
+  ],
+  "pois": [
+    {"id": 1,  "name": "City Museum",     "type": "museum",   "x": 10, "y": 10, "values": {"tickets": 12, "open": "10:00-18:00"}},
+    {"id": 2,  "name": "Art Hall",        "type": "gallery",  "x": 20, "y": 20, "values": {"curator": "Mira", "open": "11:00-19:00"}},
+    {"id": 3,  "name": "Central Park",    "type": "park",     "x": 0,  "y": 5,  "values": {"benches": 8, "area": 120}},
+    {"id": 4,  "name": "Riverside Park",  "type": "park",     "x": 0,  "y": 0,  "values": {"benches": 5, "area": 200}},               
+    {"id": 6,  "name": "East Lookout",    "type": "viewpoint","x": 10, "y": 0,  "values": {"elevation": 250}},                         
+    {"id": 5,  "name": "Hill View",       "type": "viewpoint","x": 11, "y": 0,  "values": {"elevation": 300}},                         
+    {"id": 8,  "name": "City Cafe",       "type": "cafe",     "x": 3,  "y": 4,  "values": {"seats": 25}},                               
+    {"id": 9,  "name": "Riverside Cafe",  "type": "cafe",     "x": 3,  "y": 5,  "values": {"seats": 15}},
+    {"id": 10, "name": "Sculpture Garden","type": "museum",   "x": 40, "y": 40, "values": {"tickets": 10, "open": "09:00-17:00"}},
+    {"id": 7,  "name": "Old Gallery",     "type": "gallery",  "x": 30, "y": 30, "values": {"curator": "Ivo", "open": "10:00-18:00"}},
+    {"id": 11, "name": "Meadow Park",     "type": "park",     "x": 100,"y": 100,"values": {"benches": 3, "area": 80}}
+  ],
+  "visitors": [
+    {"id": 1, "name": "Sam",  "nationality": "GE"},
+    {"id": 2, "name": "Ana",  "nationality": "BG"},
+    {"id": 3, "name": "Bo",   "nationality": "RO"},
+    {"id": 4, "name": "Niko", "nationality": "GR"},
+    {"id": 5, "name": "Tea",  "nationality": "TR"},
+    {"id": 6, "name": "Rada", "nationality": "RS"}
+  ],
+  "visits": [
+    {"visitor_id": 1, "poi_id": 1,  "date": "01/10/2025", "rating": 7},
+    {"visitor_id": 1, "poi_id": 2,  "date": "02/10/2025", "rating": 8},
+    {"visitor_id": 1, "poi_id": 3,  "date": "03/10/2025"},
+    {"visitor_id": 2, "poi_id": 1,  "date": "04/10/2025", "rating": 6},
+    {"visitor_id": 2, "poi_id": 3,  "date": "05/10/2025"},
+    {"visitor_id": 2, "poi_id": 6,  "date": "06/10/2025"},
+    {"visitor_id": 3, "poi_id": 3,  "date": "07/10/2025", "rating": 7},
+    {"visitor_id": 3, "poi_id": 8,  "date": "08/10/2025", "rating": 5},
+    {"visitor_id": 3, "poi_id": 4,  "date": "09/10/2025", "rating": 6},  
+    {"visitor_id": 4, "poi_id": 2,  "date": "10/10/2025", "rating": 8},
+    {"visitor_id": 4, "poi_id": 2,  "date": "11/10/2025", "rating": 9},   
+    {"visitor_id": 5, "poi_id": 10, "date": "12/10/2025"},
+    {"visitor_id": 6, "poi_id": 7,  "date": "13/10/2025"},
+    {"visitor_id": 6, "poi_id": 2,  "date": "14/10/2025"}
+  ]
+}

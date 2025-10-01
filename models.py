@@ -75,7 +75,7 @@ class Visit:
         self.visitor = visitor
         self.poi = poi
         self.date =  _validate_date_ddmmyyyy(date) #Handle date format and validation
-        self.rating = rating      # optional numeric rating, logs: 1) Added error handling to be out of 10, broke my testings...
+        self.rating = rating # optional numeric rating, logs: 1) Added error handling to be out of 10, broke my testings...
 
     def __str__(self) -> str:
         r = f", rating={self.rating}" if self.rating is not None else ""

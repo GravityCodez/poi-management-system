@@ -242,7 +242,9 @@ class POIRegistry:
         Deterministic tie-break: if distances tie (within EPS), pick the pair
         with smaller (min_id, max_id), then by names A→Z.
         """
-        """We considered the O(n log n) divide-and-conquer approach but 
+        """
+        !!!!IMPORTANT!!!!
+        We considered the O(n log n) divide-and-conquer approach but 
         chose the O(n²) version for clarity and because input sizes in this assignment are small.
         We still keep deterministic tie-breakers and epsilon-aware comparisons.
         """
@@ -416,7 +418,5 @@ class POIRegistry:
         t = self._types.pop(oldk)
         t.name = newk
         self._types[newk] = t
-
-
 
 
