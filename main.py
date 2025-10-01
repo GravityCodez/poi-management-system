@@ -145,6 +145,31 @@ def top_visitors_menu(reg: POIRegistry):
     for v, cnt in rows:
         print(f"{v.id}\t{v.name}\t{cnt} distinct POIs")
 
+def counts_per_poi_menu(reg: POIRegistry):
+    rows = reg.counts_distinct_visitors_per_poi()
+    if not rows:
+        print("No POIs yet."); return
+    for p, cnt in rows:
+        print(f"{p.id}\t{p.name}\t{cnt} distinct visitors")
+
+def counts_per_visitor_menu(reg: POIRegistry):
+    rows = reg.counts_distinct_pois_per_visitor()
+    if not rows:
+        print("No visitors yet."); return
+    for v, cnt in rows:
+        print(f"{v.id}\t{v.name}\t{cnt} distinct POIs")
+
+def coverage_fairness_menu(reg: POIRegistry):
+    m = prompt_int("Minimum DISTINCT POIs (m): ")
+    t = prompt_int("Minimum DISTINCT TYPES (t): ")
+    try:
+        rows = reg.visitors_meeting_coverage(m, t)
+    except ValueError as e:
+        print("Error:", e); return
+    if not rows:
+        print("No visitors meet the thresholds."); return
+    for v, pois, types in rows:
+        print(f"{v.id}\t{v.name}\tpois={pois}\ttypes={types}")
 
 #Spatial queries from PQ4
 def within_radius_menu(reg: POIRegistry):
@@ -192,6 +217,9 @@ def main():
         "10": ("Exactly on boundary",  boundary_menu),
         "11": ("Top-k POIs by distinct visitors (VQ5)", top_pois_menu),
         "12": ("Top-k visitors by distinct POIs (VQ4)", top_visitors_menu),
+        "13": ("Counts: distinct visitors per POI (VQ2)", counts_per_poi_menu),
+        "14": ("Counts: distinct POIs per visitor (VQ3)", counts_per_visitor_menu),
+        "15": ("Coverage fairness (VQ7)", coverage_fairness_menu),
         "0": ("Quit", None),
     }
     while True:

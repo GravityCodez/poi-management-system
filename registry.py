@@ -327,5 +327,56 @@ class POIRegistry:
             rows.append((date, vid, name, nat))
         rows.sort(key=lambda t: (t[1], t[2]))  # id→name
         return rows
+    
+    # ---------- VQ2: number of DISTINCT visitors per POI (include zero-visit POIs) ----------
+    def counts_distinct_visitors_per_poi(self):
+        """Return [(POI, count)], sorted by count desc, then id, then name."""
+        # build poi_id -> set(visitor_ids)
+        distinct: Dict[int, set[int]] = {}
+        for vis in self._visits:
+            distinct.setdefault(vis.poi.id, set()).add(vis.visitor.id)
+        rows = []
+        for pid, p in self._pois.items():
+            cnt = len(distinct.get(pid, set()))
+            rows.append((-cnt, p.id, p.name, p, cnt))
+        rows.sort(key=lambda t: (t[0], t[1], t[2]))
+        return [(p, cnt) for (_nc, _id, _nm, p, cnt) in rows]
+
+    # ---------- VQ3: number of DISTINCT POIs per visitor (include visitors with zero) ----------
+    def counts_distinct_pois_per_visitor(self):
+        """Return [(Visitor, count)], sorted by count desc, then id, then name."""
+        # build visitor_id -> set(poi_ids)
+        distinct: Dict[int, set[int]] = {vid: set() for vid in self._visitors.keys()}
+        for vis in self._visits:
+            distinct.setdefault(vis.visitor.id, set()).add(vis.poi.id)
+        rows = []
+        for vid, v in self._visitors.items():
+            cnt = len(distinct.get(vid, set()))
+            rows.append((-cnt, v.id, v.name, v, cnt))
+        rows.sort(key=lambda t: (t[0], t[1], t[2]))
+        return [(v, cnt) for (_nc, _id, _nm, v, cnt) in rows]
+
+    # ---------- VQ7: coverage fairness ----------
+    def visitors_meeting_coverage(self, m: int, t: int):
+        """Visitors who visited ≥ m DISTINCT POIs across ≥ t DISTINCT TYPES.
+        Return [(Visitor, poi_count, type_count)], sorted by poi_count desc,
+        then type_count desc, then id, then name.
+        """
+        if m < 0 or t < 0:
+            raise ValueError("m and t must be non-negative integers")
+        poi_sets: Dict[int, set[int]] = {}
+        type_sets: Dict[int, set[str]] = {}
+        for vis in self._visits:
+            vid = vis.visitor.id
+            poi_sets.setdefault(vid, set()).add(vis.poi.id)
+            type_sets.setdefault(vid, set()).add(vis.poi.poi_type.name)
+        rows = []
+        for vid, v in self._visitors.items():
+            pois = len(poi_sets.get(vid, set()))
+            types = len(type_sets.get(vid, set()))
+            if pois >= m and types >= t:
+                rows.append((-pois, -types, v.id, v.name, v, pois, types))
+        rows.sort(key=lambda r: (r[0], r[1], r[2], r[3]))
+        return [(v, pois, types) for (_np, _nt, _id, _nm, v, pois, types) in rows]
 
 
