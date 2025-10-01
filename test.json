@@ -1,0 +1,18 @@
+{
+  "types": [
+    {"name": "museum", "attributes": ["tickets", "open"]},
+    {"name": "park", "attributes": ["benches"]}
+  ],
+  "pois": [
+    {"id": 1, "name": "City Museum", "type": "museum", "x": 10, "y": 10, "values": {"tickets": 12, "open": "10:00-18:00"}},
+    {"id": 2, "name": "Central Park", "type": "park", "x": 0, "y": 5, "values": {"benches": 8}}
+  ],
+  "visitors": [
+    {"id": 1, "name": "Sam", "nationality": "GE"},
+    {"id": 2, "name": "Ana", "nationality": "BG"}
+  ],
+  "visits": [
+    {"visitor_id": 1, "poi_id": 1, "date": "10/10/2025", "rating": 7},
+    {"visitor_id": 2, "poi_id": 2, "date": "11/10/2025"}
+  ]
+}
