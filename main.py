@@ -75,6 +75,49 @@ def nearest_k_menu(reg: POIRegistry):
     for poi, dist in results:
         print(f"Nearest: {poi.name} ({poi.id}) dist={round(dist, 3)}")
 
+def list_pois_type_menu(reg: POIRegistry):
+    tname = prompt_str("Type name: ")
+    rows = reg.list_pois_of_type_with_values(tname)
+    if not rows:
+        print("No POIs for that type (or unknown type).")
+        return
+    for poi, vals in rows:
+        print(f"{poi.id}\t{poi.name}\tcenter={poi.coord}\t{vals}")
+
+#visitor history menu
+def list_visitor_history_menu(reg: POIRegistry):
+    vid = prompt_int("Visitor id: ")
+    try:
+        rows = reg.list_visited_pois_for_visitor(vid)
+    except KeyError as e:
+        print("Error:", e); return
+    if not rows:
+        print("No visits for this visitor yet.")
+        return
+    for pid, pname, date in rows:
+        print(f"{date}\t{pid}\t{pname}")
+
+#good handler that turned out ot be VERY useful
+def prompt_yesno(msg: str) -> bool:
+    while True:
+        s = input(msg + " [y/n]: ").strip().lower()
+        if s in ("y", "yes"): return True
+        if s in ("n", "no"): return False
+        print("Please type y or n.")
+
+def visitors_for_poi_menu(reg: POIRegistry):
+    pid = prompt_int("POI id: ")
+    distinct = prompt_yesno("Distinct visitors only?")
+    try:
+        rows = reg.list_visitors_for_poi(pid, distinct=distinct)
+    except KeyError as e:
+        print("Error:", e); return
+    if not rows:
+        print("No visits for that POI yet."); return
+    for date, vid, name, nat in rows:
+        print(f"{date}\t{vid}\t{name}\t{nat}")
+
+
 def main():
     reg = POIRegistry()
     MENU = {
@@ -83,6 +126,9 @@ def main():
         "3": ("Record visit (dd/mm/yyyy)", record_visit_menu),
         "4": ("Counts per type", counts_menu),
         "5": ("Nearest-k", nearest_k_menu),
+        "6": ("List POIs of a type", list_pois_type_menu),
+        "7": ("Visitor history", list_visitor_history_menu),
+        "8": ("Visitors for a POI (VQ2)", visitors_for_poi_menu),
         "0": ("Quit", None),
     }
     while True:
@@ -91,7 +137,7 @@ def main():
             print(f"{key}) {MENU[key][0]}")
         choice = input("Choose: ").strip()
         if choice == "0":
-            print("Bye."); break
+            print("And with that, our demo comes to an end, goodnight!"); break
         action = MENU.get(choice)
         if not action:
             print("Unknown choice.")

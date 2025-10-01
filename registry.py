@@ -1,9 +1,10 @@
 from __future__ import annotations
 import math
 from typing import Dict, List, Set
+from datetime import datetime
 
 from models import (
-    POIType, POI, Visitor, Visit,
+    POIType, POI, Visitor, Visit, DATE_FMT,
     _check_coord, is_close
 )
 
@@ -271,5 +272,51 @@ class POIRegistry:
             counts[p.poi_type.name] = counts.get(p.poi_type.name, 0) + 1
         rows = [(-cnt, name, cnt) for name, cnt in counts.items()]
         rows.sort(key=lambda t: (t[0], t[1]))  # -count then name
-        return [(name, cnt) for (_neg, name, cnt) in rows]
+        return [(name, cnt) for (_neg, name, cnt) in rows] 
+    
+    #Visitors Query
+    def list_visited_pois_for_visitor(self, visitor_id: int):
+        """Return [(poi_id, poi_name, date)] for ALL recorded visits of that visitor,
+        sorted by date (oldest→newest), then poi id, then name.
+        """
+        if visitor_id not in self._visitors:
+            raise KeyError(f"Unknown visitor id {visitor_id}")
+        rows = []
+        for vis in self._visits:
+            if vis.visitor.id == visitor_id:
+                dt = datetime.strptime(vis.date, DATE_FMT)
+                rows.append((dt, vis.poi.id, vis.poi.name, vis.date))
+        rows.sort(key=lambda t: (t[0], t[1], t[2]))
+        # strip parsed dt for output
+        return [(pid, pname, date) for (_dt, pid, pname, date) in rows]
+    
+    def list_visitors_for_poi(self, poi_id: int, distinct: bool = False):
+        """Return rows for a POI.
+        If distinct=False: [(date, visitor_id, name, nationality)] sorted by date→id→name.
+        If distinct=True:  [(earliest_date, visitor_id, name, nationality)] (one per visitor), id→name.
+        """
+        if poi_id not in self._pois:
+            raise KeyError(f"Unknown poi id {poi_id}")
+
+        if not distinct:
+            rows = []
+            for vis in self._visits:
+                if vis.poi.id == poi_id:
+                    rows.append((vis.date, vis.visitor.id, vis.visitor.name, vis.visitor.nationality))
+            rows.sort(key=lambda t: (t[0], t[1], t[2]))
+            return rows
+
+        # distinct visitors: keep earliest date per visitor
+        earliest = {}
+        for vis in self._visits:
+            if vis.poi.id == poi_id:
+                vid = vis.visitor.id
+                if (vid not in earliest) or (vis.date < earliest[vid][0]):  # dd/mm/yyyy safe because we kept same format
+                    earliest[vid] = (vis.date, vis.visitor.name, vis.visitor.nationality)
+        rows = []
+        for vid, (date, name, nat) in earliest.items():
+            rows.append((date, vid, name, nat))
+        rows.sort(key=lambda t: (t[1], t[2]))  # id→name
+        return rows
+
 
