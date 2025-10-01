@@ -7,6 +7,8 @@ from models import (
     _check_coord, is_close
 )
 
+EPS = 1e-9
+
 
 class POIRegistry:
     def __init__(self):
@@ -168,4 +170,106 @@ class POIRegistry:
 
     def get_poi_visit_count(self, poi_id: int) -> int:
         return sum(1 for vis in self._visits if vis.poi.id == poi_id)
+   
+    # ---------- Attributes on a POI type ----------
+    def add_attribute_to_type(self, type_name: str, attr_name: str) -> None:
+        key = type_name.strip().lower()
+        attr = attr_name.strip()
+        t = self._types.get(key)
+        if not t:
+            raise KeyError(f"Unknown POI type '{type_name}'")
+        if not attr:
+            raise ValueError("Attribute name cannot be empty")
+        if attr in t.attributes:
+            raise ValueError(f"Attribute '{attr}' already exists on type '{type_name}'")
+        t.attributes.append(attr)
+        # migrate existing POIs of this type: default None
+        for p in self._pois.values():
+            if p.poi_type is t and attr not in p.values:
+                p.values[attr] = None
+
+    def delete_attribute_from_type(self, type_name: str, attr_name: str) -> bool:
+        key = type_name.strip().lower()
+        attr = attr_name.strip()
+        t = self._types.get(key)
+        if not t:
+            return False
+        if attr not in t.attributes:
+            return False
+        t.attributes.remove(attr)
+        # migrate existing POIs of this type: drop the key
+        for p in self._pois.values():
+            if p.poi_type is t and attr in p.values:
+                del p.values[attr]
+        return True
+
+    # ---------- PQ1 ----------
+    def list_pois_of_type_with_values(self, type_name: str):
+        """Return [(POI, {attr: value or None,...})] for the given type, in id->name order."""
+        key = type_name.strip().lower()
+        t = self._types.get(key)
+        if not t:
+            return []
+        rows = []
+        for p in self._pois.values():
+            if p.poi_type is t:
+                full = {a: p.values.get(a, None) for a in t.attributes}
+                rows.append((p, full))
+        # deterministic order (id, then name) per brief’s rule
+        rows.sort(key=lambda r: (r[0].id, r[0].name))
+        return rows
+
+    # ---------- PQ2: closest pair of POIs (O(n^2), deterministic ties) ----------
+    def closest_pair_pois(self):
+        """Return ((p1, p2), distance). If <2 POIs, return None.
+        Deterministic tie-break: if distances tie (within EPS), pick the pair
+        with smaller (min_id, max_id), then by names A→Z.
+        """
+        """We considered the O(n log n) divide-and-conquer approach but 
+        chose the O(n²) version for clarity and because input sizes in this assignment are small.
+        We still keep deterministic tie-breakers and epsilon-aware comparisons.
+        """
+        pois = list(self._pois.values())
+        n = len(pois)
+        if n < 2:
+            return None
+
+        best_d = float("inf")
+        best_pair = None
+
+        for i in range(n):
+            pi = pois[i]
+            xi, yi = pi.coord
+            for j in range(i + 1, n):
+                pj = pois[j]
+                xj, yj = pj.coord
+                d = math.hypot(xi - xj, yi - yj)
+
+                if best_pair is None or d + EPS < best_d:
+                    best_d, best_pair = d, (pi, pj)
+                elif is_close(d, best_d):
+                    # tie-break by ids, then names (both normalized to ascending)
+                    c_ids = (min(pi.id, pj.id), max(pi.id, pj.id),
+                             min(pi.name, pj.name), max(pi.name, pj.name))
+                    b1, b2 = best_pair
+                    b_ids = (min(b1.id, b2.id), max(b1.id, b2.id),
+                             min(b1.name, b2.name), max(b1.name, b2.name))
+                    if c_ids < b_ids:
+                        best_d, best_pair = d, (pi, pj)
+
+        p1, p2 = best_pair
+        if p1.id > p2.id:
+            p1, p2 = p2, p1
+        return (p1, p2), best_d
+    
+    # ---------- PQ3: counts per type (include zero-count types) ----------
+    def counts_per_type(self):
+        """Return [(type_name, count)], sorted by count desc, then name asc."""
+        # start with zero for every known type
+        counts: Dict[str, int] = {tname: 0 for tname in self._types.keys()}
+        for p in self._pois.values():
+            counts[p.poi_type.name] = counts.get(p.poi_type.name, 0) + 1
+        rows = [(-cnt, name, cnt) for name, cnt in counts.items()]
+        rows.sort(key=lambda t: (t[0], t[1]))  # -count then name
+        return [(name, cnt) for (_neg, name, cnt) in rows]
 
