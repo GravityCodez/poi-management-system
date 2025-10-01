@@ -123,6 +123,23 @@ def visitors_for_poi_menu(reg: POIRegistry):
     for date, vid, name, nat in rows:
         print(f"{date}\t{vid}\t{name}\t{nat}")
 
+def top_pois_menu(reg: POIRegistry):
+    k = prompt_int("k (>0): ")
+    rows = reg.top_k_pois_by_distinct_visitors(k)
+    if not rows:
+        print("No results (need recorded visits)."); return
+    for poi, cnt in rows:
+        print(f"{poi.id}\t{poi.name}\t{cnt} distinct visitors")
+
+def top_visitors_menu(reg: POIRegistry):
+    k = prompt_int("k (>0): ")
+    rows = reg.top_k_visitors_by_distinct_pois(k)
+    if not rows:
+        print("No results (need recorded visits)."); return
+    for v, cnt in rows:
+        print(f"{v.id}\t{v.name}\t{cnt} distinct POIs")
+
+
 #Spatial queries from PQ4
 def within_radius_menu(reg: POIRegistry):
     x = prompt_int("x (0..999): ")
@@ -167,6 +184,8 @@ def main():
         "8": ("Visitors for a POI", visitors_for_poi_menu),
         "9":  ("Within radius (PQ4)", within_radius_menu),
         "10": ("Exactly on boundary",  boundary_menu),
+        "11": ("Top-k POIs by distinct visitors (VQ5)", top_pois_menu),
+        "12": ("Top-k visitors by distinct POIs (VQ4)", top_visitors_menu),
         "0": ("Quit", None),
     }
     while True:
