@@ -164,7 +164,19 @@ if __name__ == "__main__":
     # reg4.add_type("museum", ["tickets"])
     # pA = reg4.add_poi(400, "Natl Museum", "museum", 50, 50, {"tickets": 10})
     # vA = reg4.add_visitor(1, "Bob", "BG")
+    # # --- visit demo ---
+    # reg4 = POIRegistry()
+    # reg4.add_type("museum", ["tickets"])
+    # pA = reg4.add_poi(400, "Natl Museum", "museum", 50, 50, {"tickets": 10})
+    # vA = reg4.add_visitor(1, "Bob", "BG")
 
+    # v1 = reg4.record_visit(1, 400, "30/09/2025", rating=4.5)
+    # try:
+    #     v2 = reg4.record_visit(1, 400, "01-10-2025")
+    # except ValueError as e:
+    #     print("Visit error:", e) # invalid date format, should error
+    # print("Visits for Natl Museum:", reg4.get_poi_visit_count(400))
+    # print("First visit date:", v1.date)  # should print 30/09/2025
     # v1 = reg4.record_visit(1, 400, "30/09/2025", rating=4.5)
     # try:
     #     v2 = reg4.record_visit(1, 400, "01-10-2025")
@@ -179,7 +191,16 @@ if __name__ == "__main__":
     # p1 = reg5.add_poi(501, "Oak Park", "park", 10, 10, {"benches": 5})
     # p2 = reg5.add_poi(502, "Pine Park", "park", 20, 20, {"benches": 3})
     # p3 = reg5.add_poi(503, "Maple Park", "park", 30, 30, {"benches": 2})
+    # # --- VQ5: top-k POIs by DISTINCT visitors ---
+    # reg5 = POIRegistry()
+    # reg5.add_type("park", ["benches"])
+    # p1 = reg5.add_poi(501, "Oak Park", "park", 10, 10, {"benches": 5})
+    # p2 = reg5.add_poi(502, "Pine Park", "park", 20, 20, {"benches": 3})
+    # p3 = reg5.add_poi(503, "Maple Park", "park", 30, 30, {"benches": 2})
 
+    # v1 = reg5.add_visitor(11, "Ana", "BG")
+    # v2 = reg5.add_visitor(12, "Ben", "RO")
+    # v3 = reg5.add_visitor(13, "Cia", "GR")
     # v1 = reg5.add_visitor(11, "Ana", "BG")
     # v2 = reg5.add_visitor(12, "Ben", "RO")
     # v3 = reg5.add_visitor(13, "Cia", "GR")
@@ -189,7 +210,15 @@ if __name__ == "__main__":
     # reg5.record_visit(12, 501, "01/10/2025")
     # reg5.record_visit(12, 501, "02/10/2025")   # same visitor revisits -> still counts once
     # reg5.record_visit(13, 502, "01/10/2025")
+    # # record visits (duplicates for same visitor+POI should NOT inflate distinct count)
+    # reg5.record_visit(11, 501, "01/10/2025")
+    # reg5.record_visit(12, 501, "01/10/2025")
+    # reg5.record_visit(12, 501, "02/10/2025")   # same visitor revisits -> still counts once
+    # reg5.record_visit(13, 502, "01/10/2025")
 
+    # top = reg5.top_k_pois_by_distinct_visitors(2)
+    # for poi, cnt in top:
+    #     print("Top POI:", poi.name, cnt)
     # top = reg5.top_k_pois_by_distinct_visitors(2)
     # for poi, cnt in top:
     #     print("Top POI:", poi.name, cnt)
@@ -197,7 +226,13 @@ if __name__ == "__main__":
     # # --- VQ4: top-k VISITORS by DISTINCT POIs visited ---
     # reg6 = POIRegistry()
     # reg6.add_type("site", ["tag"])
+    # # --- VQ4: top-k VISITORS by DISTINCT POIs visited ---
+    # reg6 = POIRegistry()
+    # reg6.add_type("site", ["tag"])
 
+    # p1 = reg6.add_poi(601, "S1", "site", 0, 0, {"tag": "a"})
+    # p2 = reg6.add_poi(602, "S2", "site", 1, 1, {"tag": "b"})
+    # p3 = reg6.add_poi(603, "S3", "site", 2, 2, {"tag": "c"})
     # p1 = reg6.add_poi(601, "S1", "site", 0, 0, {"tag": "a"})
     # p2 = reg6.add_poi(602, "S2", "site", 1, 1, {"tag": "b"})
     # p3 = reg6.add_poi(603, "S3", "site", 2, 2, {"tag": "c"})
@@ -205,7 +240,17 @@ if __name__ == "__main__":
     # v1 = reg6.add_visitor(21, "Ava", "BG")
     # v2 = reg6.add_visitor(22, "Bo", "RO")
     # v3 = reg6.add_visitor(23, "Cam", "GR")
+    # v1 = reg6.add_visitor(21, "Ava", "BG")
+    # v2 = reg6.add_visitor(22, "Bo", "RO")
+    # v3 = reg6.add_visitor(23, "Cam", "GR")
 
+    # # Ava visits S1 twice (should count once), and S2 once -> 2 distinct POIs
+    # reg6.record_visit(21, 601, "01/10/2025")
+    # reg6.record_visit(21, 601, "02/10/2025")
+    # reg6.record_visit(21, 602, "02/10/2025")
+    # # Bo visits S3 -> 1 distinct
+    # reg6.record_visit(22, 603, "01/10/2025")
+    # # Cam visits none
     # # Ava visits S1 twice (should count once), and S2 once -> 2 distinct POIs
     # reg6.record_visit(21, 601, "01/10/2025")
     # reg6.record_visit(21, 601, "02/10/2025")
