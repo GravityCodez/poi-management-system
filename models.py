@@ -1,7 +1,12 @@
 from __future__ import annotations
 from typing import Dict, List, Tuple
+import math
 
 MAP_SIZE = 1000  # 1000 x 1000 grid fixed
+EPS = 1e-9
+
+def is_close(a: float, b: float, eps: float = EPS) -> bool:
+    return abs(a - b) <= eps
 
 def _check_coord(x: int, y: int) -> Tuple[int, int]:
     # keep coords integers and inside [0, MAP_SIZE)
@@ -37,6 +42,11 @@ class POI:
     def name(self) -> str: return self._name
     @property
     def coord(self) -> Tuple[int, int]: return (self._x, self._y)
+
+    def distance_to(self, other: "POI") -> float:
+        dx = self._x - other._x
+        dy = self._y - other._y
+        return math.hypot(dx, dy) # distance formula by a samrt math library
 
     def __str__(self) -> str:  # pretty printing like your dunder example
         return f"POI(id={self.id}, name={self.name}, type={self.poi_type.name}, center={self.coord})"
@@ -84,7 +94,47 @@ class POIRegistry:
 
     def list_types(self) -> List[str]:
         return sorted(self._types.keys())
+    
+    def nearest_k(self, x: int, y: int, k: int):
+        # PQ5: k POIs closest to c0 = (x, y) by Euclidean distance
+        x, y = _check_coord(x, y)           # grid is 1000x1000, integer coords
+        if k <= 0:
+            return []
+        items = []
+        for p in self._pois.values():
+            px, py = p.coord                # use POI center
+            d = math.hypot(px - x, py - y)  # same distance formula
+            items.append((d, p.id, p.name, p))
+        items.sort(key=lambda t: (t[0], t[1], t[2]))  # expectable tie-break: distance, id, name
+        return [(p, d) for (d, _id, _name, p) in items[:k]]
+    
+    def within_radius(self, x: int, y: int, r: float):
+        # PQ4: POIs with distance <= r from (x, y), using epsilon-aware comparison
+        x, y = _check_coord(x, y)
+        if r < 0:
+            return []
+        items = []
+        for p in self._pois.values():
+            px, py = p.coord
+            d = math.hypot(px - x, py - y)
+            if d < r or is_close(d, r):          # include boundary
+                items.append((d, p.id, p.name, p))
+        items.sort(key=lambda t: (t[0], t[1], t[2]))  # deterministic ordering
+        return [(p, d) for (d, _id, _name, p) in items]
 
+    def exactly_on_boundary(self, x: int, y: int, r: float):
+        # Boundary-only: distance == r, judged with epsilon
+        x, y = _check_coord(x, y)
+        if r < 0:
+            return []
+        hits = []
+        for p in self._pois.values():
+            px, py = p.coord
+            d = math.hypot(px - x, py - y)
+            if is_close(d, r):
+                hits.append((d, p.id, p.name, p))
+        hits.sort(key=lambda t: (t[0], t[1], t[2]))
+        return [(p, d) for (d, _id, _name, p) in hits]
     # --- POIs ---
     def add_poi(self, poi_id: int, name: str, type_name: str,
                 x: int, y: int, values: Dict[str, object] | None = None) -> POI:
