@@ -41,27 +41,33 @@ def add_poi_menu(reg: POIRegistry):
 
 def record_visit_menu(reg: POIRegistry):
     vid = prompt_int("Visitor id (int): ")
-    vname = prompt_str("Visitor name: ")
-    nat = prompt_str("Visitor nationality (2 letters is fine): ")
     pid = prompt_int("POI id (existing): ")
     date = prompt_str("Date (dd/mm/yyyy): ")
     rating_raw = input("Rating (optional, blank to skip): ").strip()
     rating = float(rating_raw) if rating_raw else None
-    # try to record; if visitor missing, create then retry
+
     try:
         reg.record_visit(vid, pid, date, rating)
         print("Visit recorded.")
     except KeyError as e:
         msg = str(e).lower()
         if "visitor" in msg:
+            # Ask details ONLY if the visitor is new
+            name = prompt_str("New visitor name: ")
+            nat  = prompt_str("New visitor nationality (2 letters ok): ")
             try:
-                reg.add_visitor(vid, vname, nat)
+                reg.add_visitor(vid, name, nat)
                 reg.record_visit(vid, pid, date, rating)
                 print("Visitor created and visit recorded.")
             except Exception as e2:
                 print("Error:", e2)
         else:
+            # e.g., unknown POI id
             print("Error:", e)
+    except ValueError as ve:
+        # e.g., bad date format (must be dd/mm/yyyy)
+        print("Error:", ve)
+
 
 def counts_menu(reg: POIRegistry):
     for name, cnt in reg.counts_per_type():
@@ -117,6 +123,36 @@ def visitors_for_poi_menu(reg: POIRegistry):
     for date, vid, name, nat in rows:
         print(f"{date}\t{vid}\t{name}\t{nat}")
 
+#Spatial queries from PQ4
+def within_radius_menu(reg: POIRegistry):
+    x = prompt_int("x (0..999): ")
+    y = prompt_int("y (0..999): ")
+    r_str = prompt_str("radius (float): ")
+    try:
+        r = float(r_str)
+    except ValueError:
+        print("Please enter a number for radius."); return
+    results = reg.within_radius(x, y, r)
+    if not results:
+        print("No POIs within radius.")
+        return
+    for poi, dist in results:
+        print(f"Within: {poi.name} ({poi.id}) dist={round(dist, 3)}")
+
+def boundary_menu(reg: POIRegistry):
+    x = prompt_int("x (0..999): ")
+    y = prompt_int("y (0..999): ")
+    r_str = prompt_str("radius (float): ")
+    try:
+        r = float(r_str)
+    except ValueError:
+        print("Please enter a number for radius."); return
+    results = reg.exactly_on_boundary(x, y, r)
+    if not results:
+        print("No POIs exactly on boundary.")
+        return
+    for poi, dist in results:
+        print(f"On boundary: {poi.name} ({poi.id}) dist={round(dist, 3)}")
 
 def main():
     reg = POIRegistry()
@@ -128,7 +164,9 @@ def main():
         "5": ("Nearest-k", nearest_k_menu),
         "6": ("List POIs of a type", list_pois_type_menu),
         "7": ("Visitor history", list_visitor_history_menu),
-        "8": ("Visitors for a POI (VQ2)", visitors_for_poi_menu),
+        "8": ("Visitors for a POI", visitors_for_poi_menu),
+        "9":  ("Within radius (PQ4)", within_radius_menu),
+        "10": ("Exactly on boundary",  boundary_menu),
         "0": ("Quit", None),
     }
     while True:
