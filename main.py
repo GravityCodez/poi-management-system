@@ -1,5 +1,5 @@
 #By GravityCodez
-#https://github.com/GravityCodez/poi-management-systemx
+#https://github.com/GravityCodez/poi-management-system
 
 from models import POIType, POI, Visitor,  is_close #redundand import
 from registry import POIRegistry
