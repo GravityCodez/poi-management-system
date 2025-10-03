@@ -327,7 +327,7 @@ The menu is numerically sorted (1-20) with option 0 for quit. Operations are gro
 - Visits: 3
 - Queries: 4-15, 20
 
-## 6. Reflection (300-500 words)
+## 6. Reflection
 
 The development of this POI management system involved numerous design trade-offs that shaped the final architecture. One of the most significant decisions was choosing O(n²) brute-force for the closest-pair problem (PQ2) despite knowing the O(n log n) divide-and-conquer solution. Initial experimentation with the faster algorithm showed minimal performance differences at the assignment's scale (hundreds of POIs), while the brute-force approach offered substantially clearer code that was easier to debug and integrate with epsilon-based comparisons and deterministic tie-breaking. This reinforced an important lesson: algorithmic efficiency exists on a spectrum with maintainability, and the "optimal" choice depends heavily on context.
 
